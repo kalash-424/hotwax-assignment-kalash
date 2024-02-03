@@ -13,18 +13,27 @@ const apicontrollers = {
         marital_status_enum_id,
         employment_status_enum_id,
         occupation,
+        party_id,
       } = req.body;
-
-      // Implement logic to create a person in the database
+  
+      // Check if the party with the given party_id already exists
+      const [existingParty] = await db.query('SELECT * FROM party WHERE party_id = ?', [party_id]);
+  
+      if (!existingParty.length) {
+        // If the party doesn't exist, create a new party
+        await db.query('INSERT INTO party (party_id, party_enum_type_id) VALUES (?, ?)', [party_id, 'PERSON']);
+      }
+  
+      // Now create the person with the specified party_id
       const result = await db.query(
         'INSERT INTO person (party_id, first_name, middle_name, last_name, gender, birth_date, marital_status_enum_id, employment_status_enum_id, occupation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [req.body.party_id, first_name, middle_name, last_name, gender, birth_date, marital_status_enum_id, employment_status_enum_id, occupation]
+        [party_id, first_name, middle_name, last_name, gender, birth_date, marital_status_enum_id, employment_status_enum_id, occupation]
       );
-
+  
       res.status(201).json({
         success: true,
         message: 'Person created successfully',
-        party_id: req.body.party_id,
+        party_id: party_id,
       });
     } catch (error) {
       console.error('Error creating person:', error);
@@ -33,7 +42,8 @@ const apicontrollers = {
         message: 'Internal Server Error',
       });
     }
-  },
+  }
+  ,
 
   createOrder: async (req, res) => {
     try {
