@@ -12,8 +12,6 @@ app.use('/', routes);
 
 const server = http.createServer(app);
 
-// Remove the db.connect part, as it's not needed with mysql2/promise
-
 server.listen(5000, () => {
   console.log('listening to PORT 5000');
 });
